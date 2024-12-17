@@ -117,6 +117,7 @@ from requests import get
 from urllib.parse import urlparse
 import pandas as pd
 import matplotlib.pyplot as plt
+import matplotlib.patches as mpatches
 from sklearn.preprocessing import StandardScaler, OneHotEncoder
 from sklearn.cluster import KMeans
 from sklearn.compose import ColumnTransformer
@@ -272,14 +273,10 @@ superhost_ratio = airbnb_df['host_is_superhost'].value_counts(normalize=True)
 
 ### Host Analysis
 
-1.Host Listings Distribution: 
+Host Listings Distribution:
+The majority of hosts own between 1 to 2 listings, with a few managing hundreds or even thousands of properties. The distribution highlights the presence of professional operators in London's Airbnb market, with the largest host managing over 3000 listings.
 
-1.1 The majority of hosts own between 1 and 2 listings, with a few managing hundreds or even thousands of properties.
-
-1.2 The distribution highlights the presence of professional operators in London's Airbnb market, with the largest host managing over 3000 listings.
-
-2.Superhost Ratio: 
-
+Superhost Ratio:
 Only 16.6% of hosts are Superhosts, suggesting that while a small percentage of hosts maintain high service standards, the majority are casual or infrequent hosts.
 
 ```{python}
@@ -305,16 +302,10 @@ plt.show()
 ### Property Type Distribution and Room Type Distribution
 
 Property Type Distribution:
-
-1.The most common property types are "Entire rental units" and "Private rooms in rental units".
-
-2.This indicates a mix of properties catering to both tourists seeking entire apartments and budget-conscious travelers looking for private rooms.
+The most common property types are "Entire rental units" and "Private rooms in rental units". This indicates a mix of properties catering to both tourists seeking entire apartments and budget-conscious travelers looking for private rooms.
 
 Room Type Distribution:
-
-1.63.7% of listings are entire homes/apartments, while 35.7% are private rooms.
-
-2.The dominance of entire homes suggests that Airbnb in London is often used for short-term vacation rentals rather than shared accommodation.
+63.7% of listings are entire homes/apartments, while 35.7% are private rooms. The dominance of entire homes suggests that Airbnb in London is often used for short-term vacation rentals rather than shared accommodation.
 
 ```{python}
 #| echo: false
@@ -345,16 +336,36 @@ plt.show()
 ### Geographical Distribution
 
 Airbnb Listings Distribution:
-
-1.Listings are concentrated in central boroughs such as Westminster, Camden, and Kensington.
-
-2.This reflects high tourist demand in central London areas.
+Listings are concentrated in central boroughs such as Westminster, Camden, and Kensington. Which reflects high tourist demand in central London areas.
 
 Listings by Borough:
+Central boroughs have the highest density of listings, correlating with higher property prices and demand for short-term accommodation. While outer boroughs have fewer listings, indicating lower demand or fewer hosts in these regions.
 
-1.Central boroughs have the highest density of listings, correlating with higher property prices and demand for short-term accommodation.
+```{python}
+#| echo: false
+import geopandas as gpd
+from shapely.geometry import Point
+import matplotlib.pyplot as plt
+import matplotlib.patches as mpatches
 
-2.Outer boroughs have fewer listings, indicating lower demand or fewer hosts in these regions.
+# Airbnb GeoDataFrame
+geometry = gpd.points_from_xy(airbnb_df['longitude'], airbnb_df['latitude'])
+airbnb_gdf = gpd.GeoDataFrame(airbnb_df, geometry=geometry, crs="EPSG:4326")
+borough = borough.to_crs(epsg=4326)
+airbnb_gdf = airbnb_gdf.to_crs(epsg=4326)
+
+# Spatialjoin
+airbnb_in_borough = gpd.sjoin(airbnb_gdf, borough_inequity, how='inner', predicate='within')
+borough_stats = airbnb_in_borough.groupby('NAME').agg(total_listings=('id', 'count')).reset_index()
+borough_final = borough_inequity.merge(borough_stats, on='NAME', how='left')
+
+plt.figure(figsize=(12, 10))
+borough_final.plot(column='total_listings', cmap='Blues', legend=True, linewidth=0.5, edgecolor='black')
+plt.title('Airbnb Listings by Borough')
+plt.xlabel("Longitude", fontsize=12)
+plt.ylabel("Latitude", fontsize=12)
+plt.show()
+```
 
 ### Conclusion
 
