@@ -48,6 +48,63 @@ jupyter:
     name: base
 ---
 
+
+## 1. Who collected the InsideAirbnb data?
+
+::: {.duedate}
+
+( 2 points; Answer due Week 7 )
+
+:::
+
+The Inside Airbnb project, founded in 2014 by Murray Cox, who wanted to dispute Airbnb's claim that 87% of the hosts rent out the place in which they live [@Alsudais2021]. The project has benefited from the John Morris, who designed and refined the user experience, and Samantha Box, who supported coding and analysis while addressing key issues. Team members like Michael “Ziggy” Mintz and Anya Sophe Behn further enhanced automation and cloud migration [@insideairbnb]. Operating independently, the project equips policymakers, researchers, and communities to address Airbnb’s effects on housing and neighborhoods.
+
+## 2. Why did they collect the InsideAirbnb data?
+
+::: {.duedate}
+
+( 4 points; Answer due Week 7 )
+
+:::
+
+The Inside Airbnb project is a mission-driven initiative that provides data and advocacy on Airbnb's impact on residential communities[@insideairbnb]. The collected data offers a more transparent and critical perspective, enabling stakeholders to assess Airbnb's role in local economies, housing markets, and community dynamics. By analyzing Airbnb listings, the project helps policymakers, researchers, and communities better understand the impact of Airbnb on issues such as housing affordability, availability, gentrification, and displacement.
+
+## 3. How did they collect it?
+
+::: {.duedate}
+
+( 5 points; Answer due Week 8 )
+
+:::
+
+Inside Airbnb's data is extracted through web scraping technology from publicly available listing information on the Airbnb website. This process collects key details, including price, location, host information, and availability. To provide accurate and up-to-date insights, the data is regularly updated, with new information replacing previous records on a monthly basis [@prentice2024]. Additionally, Inside Airbnb estimates monthly occupancy rates and income based on historical data, providing market analysis, basic hospitality indicators, and information on the legal status of the short-term rental market. At the same time, Inside Airbnb integrates geospatial data through public GIS datasets to map community boundaries and analyze the local impact. The collected data is analyzed, cleaned, and aggregated to facilitate public discussion and support the analysis of short-term rental market trends, helping communities make informed decisions regarding short-term rental regulation.
+
+## 4. How does the method of collection (Q3) impact the completeness and/or accuracy of the InsideAirbnb data? How well does it represent the process it seeks to study, and what wider issues does this raise?
+
+::: {.duedate}
+
+( 11 points; Answer due Week 9 )
+
+:::
+Since InsideAirbnb provides property information and updates it monthly, it can, to some extent, represent the overall situation of the short-term rental market and assist in analyzing dynamic changes related to the time dimension. However, InsideAirbnb's data still has temporal limitations, and the publicly available data only reflects the content uploaded by hosts, which may contain false information or omissions, such as inaccurate reviews or misleading property descriptions. These issues may cause the data to fail to fully reflect the real market situation, thus affecting research based on InsideAirbnb data and further influencing the formulation of short-term rental market regulatory policies.
+
+## 5. What ethical considerations does the use of the InsideAirbnb data raise? 
+
+::: {.duedate}
+
+( 18 points; Answer due {{< meta assess.group-date >}} )
+
+:::
+
+
+## 6. With reference to the InsideAirbnb data (*i.e.* using numbers, figures, maps, and descriptive statistics), what does an analysis of Hosts and the types of properties that they list suggest about the nature of Airbnb lettings in London? 
+
+::: {.duedate}
+
+( 15 points; Answer due {{< meta assess.group-date >}} )
+
+:::
+
 ```{python}
 #| echo: false
 # import packages
@@ -282,37 +339,6 @@ plt.tight_layout()
 plt.show()
 ```
 
-### Price and Rental Duration
-
-1.The average price of an Airbnb listing is £183, but most listings are priced between £50 and £200.
-
-2.The presence of a few extremely high-priced listings skews the average, indicating luxury rental options are available.
-
-```{python}
-#| echo: false
-# add <30 days
-filtered_min_nights = airbnb_df[airbnb_df['minimum_nights'] < 30]
-plt.figure(figsize=(10, 6))
-filtered_min_nights['minimum_nights'].plot(kind='hist', bins=30, color='skyblue', edgecolor='black')
-plt.title('Distribution of Minimum Nights (Filtered)')
-plt.xlabel('Minimum Nights')
-plt.ylabel('Frequency')
-plt.grid(axis='y', linestyle='--', alpha=0.7)
-plt.show()
-```
-
-### Minimum Nights Distribution
-
-Most properties have a minimum stay requirement of 1 to 5 nights, making Airbnb suitable for short-term rentals.
-
-```{python}
-#| echo: false
-# Under 1000
-airbnb_df[airbnb_df['price'] < 1000]['price'].plot(kind='hist', bins=50, title='Price Distribution (Under £1000)')
-plt.xlabel('Price (£)')
-plt.show()
-```
-
 ### Geographical Distribution
 
 Airbnb Listings Distribution:
@@ -372,7 +398,7 @@ The analysis of hosts and property types in the InsideAirbnb data reveals that A
 
 This section primarily explores the spatial differences of different property types and the social impacts brought by short-term rental density, using cluster analysis and geographically weighted regression. It also analyzes how such visualizations can inform the development of short-term rental (STL) regulation policies in London.
 
-### cluster analysis
+### Cluster Analysis
 
 This approach uses price, accommodates, and room type to classify the property situation across different boroughs. 
 
@@ -398,6 +424,7 @@ preprocessor = ColumnTransformer(
 )
 data_preprocessed = preprocessor.fit_transform(data)
 #Use the elbow method to select the optimal number of clusters
+'''
 sse = []
 k_range = range(2, 10) 
 
@@ -412,13 +439,14 @@ plt.xlabel('Number of Clusters (k)')
 plt.ylabel('Sum of Squared Errors (SSE)')
 plt.title('Elbow Method for Optimal k')
 plt.show()
+'''
 ```
 
-The blue area in the final result represents the high-priced property zone. The average price is 464.46, which is much higher than the other two clusters. The standard deviation is large (1001.6), indicating significant price variation in this region, with a maximum price of 80,100, suggesting the presence of extreme high-priced properties. The average accommodation capacity is 5.93, indicating that these properties are often larger in size. Among them, 94.3% are Entire home/apt (entire properties), with very few Private room or Shared room listings. These areas are mainly concentrated in the wealthier, upscale regions on the map, likely in the city center or high-income residential areas. These characteristics align with the property market in central London, such as Westminster, Kensington and Chelsea, and the City of London. These economically developed areas are hotspots for high-end rentals. However, this category is also distributed in peripheral areas such as Harrow, Havering, and Croydon, likely due to the presence of large, low-density residential areas in London's outskirts, where entire homes are often rented out at high prices. Particularly in Havering, although the area is generally low-density, a small number of newly developed or high-spec entire homes (e.g., villas or resort-style properties) drive up prices, causing these areas to be included in this cluster.
+The blue area in the final result represents the high-priced property zone. The price distribution in this area shows significant variation, with the presence of extremely high-priced properties. These properties are mostly large spaces, with 94.3% being entire homes and very few classified as private rooms or shared rooms. These areas are primarily concentrated in wealthier, high-end regions on the map, which are likely city centers or high-income residential areas. These characteristics align with the housing market trends of Central London, such as Westminster, Kensington and Chelsea, and the City of London. These regions are economically developed and serve as hotspots for the high-end rental market. However, this category is also distributed in peripheral areas like Harrow, Havering, and Croydon. This may be due to the prevalence of low-density residential properties on London’s outskirts, which are often rented as entire homes at relatively high prices. In particular, although Havering is generally a low-density residential area, a small number of newly developed or high-specification entire properties (e.g., villas or resort-style homes) can drive up prices, causing these areas to also fall into this category.
 
-The green area represents the low-priced property zone. The average price is 59.70, much lower than the other two clusters. The standard deviation is small (30.61), indicating a stable price distribution. The average accommodation capacity is 1.78, showing that these properties are small, typically catering to individuals or couples. Among them, 97.7% are Private room listings. The proportion of Shared room listings is slightly higher than in the other clusters. These properties are generally located in Outer London areas, such as Barking and Dagenham and Newham, where transportation is relatively convenient. However, the demand for these rentals primarily comes from budget-conscious tenants, such as students or solo travelers.
+The green area represents the low-priced property zone. The prices are significantly lower than those in the other two clusters. The properties are relatively small and primarily cater to individuals or couples. Most of these listings are private rooms, with a slightly higher proportion of shared rooms compared to the other clusters. These properties are typically located in Outer London, such as areas like Barking and Dagenham and Newham, where transportation is relatively convenient. However, rental demand mainly comes from budget-conscious tenants, such as students and solo travelers.
 
-The yellow area represents the medium-priced property zone. The average price is 143.69, which falls between the other two clusters. The standard deviation is 74.67, indicating a relatively balanced price distribution. The average accommodation capacity is 2.98, suggesting that these properties are medium-sized and suitable for small families or groups of three. Among them, 97.0% are Entire home/apt listings, with very few Private room or Shared room listings. These properties are typically located in Inner London areas, such as Hackney, Islington, and Southwark, forming a transitional zone.
+The yellow area represents the medium-priced property zone. These properties are mostly medium-sized, suitable for small families or groups of three. They are typically located in Inner London, such as Hackney, Islington, and Southwark, forming a transitional zone.
 
 ```{python}
 #| echo: false
@@ -477,7 +505,7 @@ plt.show()
 
 In summary, The blue area is primarily composed of high-end entire home rentals, characterized by extremely high prices and great diversity. Spatially, it may overlap with central London or upscale residential areas. The green area mainly consists of low-priced private rooms, catering to budget-conscious renters such as solo travelers or students. It is primarily located in outer or secondary market areas. The yellow area represents medium-priced rentals, mostly offering entire homes, suitable for small families or groups. Geographically, it has a broader distribution, with some overlap with tourist hotspot areas.
 
-### regression analysis
+### Regression Analysis
 
 The distribution of short-term rental properties may lead to a series of social effects. This section takes social inequality as an example to explore the impact of short-term rental distribution on social outcomes. By visualizing the spatial differences in these effects, the analysis reveals the varying urgency for policy intervention across different areas.
 
@@ -485,9 +513,9 @@ Since factors such as economic conditions, population characteristics, and trans
 
 The factors selected to describe economic conditions, population characteristics, and transportation accessibility include poverty rate, population density, density of subway stations, and density of rail lines. Principal Component Analysis (PCA) was applied to extract the most representative components from these variables.
 
-The dependent variable chosen to represent social inequality is the 80:20 ratio of earnings, which indicates the level of income inequality within a given area. Specifically, this metric reflects the ratio of the total income of the wealthiest 20% of the population to the total income of the poorest 20%.
+The dependent variable chosen to represent social inequality is the 80:20 ratio of earnings, which indicates the level of income inequality within a given area. 
 
-Administrative boroughs were used as the spatial units of analysis. The variables derived from PCA were first used to model the density of short-term rentals. The residuals—representing the portion of variation potentially linked to other effects associated with short-term rental distribution—were then used as predictors for the social inequality variable. The analysis proceeded as follows:
+The variables derived from PCA were first used to model the density of short-term rentals. The residuals—representing the portion of variation potentially linked to other effects associated with short-term rental distribution—were then used as predictors for the social inequality variable. The analysis proceeded as follows:
 
 1.A global regression was performed using Ordinary Least Squares (OLS).
 
@@ -618,10 +646,9 @@ gwr_model = GWR(coords = coords, y=real_y_scaled, X = X_loc, bw = bandwidth)
 gwr_results = gwr_model.fit()
 ```
 
-The following table describes the results of the second step, Geographically Weighted Regression (GWR). The results show that, after removing the aforementioned control factors, GWR performs better than the global regression, with the independent variables explaining more of the variation in the dependent variable. This also indicates, to some extent, that the impact of rental density on social inequality exhibits spatial variation.
-
 ```{python}
 #| echo: false
+'''
 # Define R² and Adjusted R² values for global regression and GWR regression
 global_r2 = 0.044
 global_adj_r2 = 0.010
@@ -659,10 +686,8 @@ for (i, j), cell in table.get_celld().items():
 plt.title("R² Comparison Between Global Regression and GWR", fontsize=14,fontname='Source Serif 4',y=0.8)
 # Display the table
 plt.show()
-```
+'''
 
-```{python}
-#| echo: false
 # representing the local R square
 local_r2_values = gwr_results.localR2
 # Join the obtained local R² values back to the borough data
@@ -675,7 +700,7 @@ By comparing the R² values of the GWR results across different boroughs, the ge
 
 The results reveal that certain boroughs, particularly in the central and western areas, such as Hammersmith and Fulham, display high R² values, reaching up to 0.7. This indicates that the independent variables explain 70% of the variation in the dependent variable. In contrast, boroughs such as Enfield and Waltham Forest exhibit R² values close to 0, suggesting that the effects of short-term rental distribution on social inequality vary significantly across regions.
 
-The results reveal the varying degrees to which social inequality in different regions is influenced by the distribution of short-term rentals, highlighting differences in the urgency of policy intervention across areas. For example, in Hammersmith and Fulham, the R-squared value is notably high, and the coefficient is positive, indicating a significant positive correlation between the increase in short-term rental density and the rise in social inequality. This suggests that the impact of short-term rental distribution on income inequality is particularly pronounced in this area, underscoring the greater necessity for policy intervention. Measures such as setting limits on short-term rentals, increasing taxes and fees, and encouraging properties to return to the long-term rental market can be implemented. However, the specific measures to be taken require further analysis of the underlying causes of this high correlation.
+Taking Hammersmith and Fulham as an example, the R-squared value is notably high, and the coefficient is positive, indicating a significant positive correlation between the increase in short-term rental density and the rise in social inequality. This suggests that the impact of short-term rental distribution on income inequality is particularly pronounced in this area, underscoring the greater necessity for policy intervention. Measures such as setting limits on short-term rentals, increasing taxes and fees, and encouraging properties to return to the long-term rental market can be implemented. However, the specific measures to be taken require further analysis of the underlying causes of this high correlation.
 
 ```{python}
 #| echo: false

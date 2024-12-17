@@ -1,0 +1,257 @@
+---
+bibliography: bio.bib
+csl: harvard-cite-them-right.csl
+title: Chocolate's Group Project
+assess:
+  group-date: '2024-12-17'
+execute:
+  echo: false
+  freeze: true
+format:
+  html:
+    code-copy: true
+    code-link: true
+    toc: true
+    toc-title: On this page
+    toc-depth: 2
+    toc_float:
+      collapsed: false
+      smooth_scroll: true
+  pdf:
+    include-in-header:
+      text: |
+        \addtokomafont{disposition}{\rmfamily}
+    mainfont: Spectral
+    sansfont: Roboto Flex
+    monofont: Liberation Mono
+    papersize: a4
+    geometry:
+      - top=25mm
+      - left=40mm
+      - right=30mm
+      - bottom=25mm
+      - heightrounded
+    toc: false
+    number-sections: false
+    colorlinks: true
+    highlight-style: github
+jupyter:
+  jupytext:
+    text_representation:
+      extension: .qmd
+      format_name: quarto
+      format_version: '1.0'
+      jupytext_version: 1.16.4
+  kernelspec:
+    display_name: Python (base)
+    language: python
+    name: base
+---
+
+## 1. Who collected the InsideAirbnb data?
+
+::: {.duedate}
+
+( 2 points; Answer due Week 7 )
+
+:::
+
+The Inside Airbnb project, founded in 2014 by Murray Cox, who wanted to dispute Airbnb's claim that 87% of the hosts rent out the place in which they live [@Alsudais2021]. The project has benefited from the John Morris, who designed and refined the user experience, and Samantha Box, who supported coding and analysis while addressing key issues. Team members like Michael “Ziggy” Mintz and Anya Sophe Behn further enhanced automation and cloud migration [@insideairbnb]. Operating independently, the project equips policymakers, researchers, and communities to address Airbnb’s effects on housing and neighborhoods.
+
+## 2. Why did they collect the InsideAirbnb data?
+
+::: {.duedate}
+
+( 4 points; Answer due Week 7 )
+
+:::
+
+The Inside Airbnb project is a mission-driven initiative that provides data and advocacy on Airbnb's impact on residential communities[@insideairbnb]. The collected data offers a more transparent and critical perspective, enabling stakeholders to assess Airbnb's role in local economies, housing markets, and community dynamics. By analyzing Airbnb listings, the project helps policymakers, researchers, and communities better understand the impact of Airbnb on issues such as housing affordability, availability, gentrification, and displacement.
+
+## 3. How did they collect it?
+
+::: {.duedate}
+
+( 5 points; Answer due Week 8 )
+
+:::
+
+Inside Airbnb's data is extracted through web scraping technology from publicly available listing information on the Airbnb website. This process collects key details, including price, location, host information, and availability. To provide accurate and up-to-date insights, the data is regularly updated, with new information replacing previous records on a monthly basis [@prentice2024]. Additionally, Inside Airbnb estimates monthly occupancy rates and income based on historical data, providing market analysis, basic hospitality indicators, and information on the legal status of the short-term rental market. At the same time, Inside Airbnb integrates geospatial data through public GIS datasets to map community boundaries and analyze the local impact. The collected data is analyzed, cleaned, and aggregated to facilitate public discussion and support the analysis of short-term rental market trends, helping communities make informed decisions regarding short-term rental regulation.
+
+## 4. How does the method of collection (Q3) impact the completeness and/or accuracy of the InsideAirbnb data? How well does it represent the process it seeks to study, and what wider issues does this raise?
+
+::: {.duedate}
+
+( 11 points; Answer due Week 9 )
+
+:::
+Since InsideAirbnb provides property information and updates it monthly, it can, to some extent, represent the overall situation of the short-term rental market and assist in analyzing dynamic changes related to the time dimension. However, InsideAirbnb's data still has temporal limitations, and the publicly available data only reflects the content uploaded by hosts, which may contain false information or omissions, such as inaccurate reviews or misleading property descriptions. These issues may cause the data to fail to fully reflect the real market situation, thus affecting research based on InsideAirbnb data and further influencing the formulation of short-term rental market regulatory policies.
+
+## 5. What ethical considerations does the use of the InsideAirbnb data raise? 
+
+::: {.duedate}
+
+( 18 points; Answer due {{< meta assess.group-date >}} )
+
+:::
+
+
+## 6. With reference to the InsideAirbnb data (*i.e.* using numbers, figures, maps, and descriptive statistics), what does an analysis of Hosts and the types of properties that they list suggest about the nature of Airbnb lettings in London? 
+
+::: {.duedate}
+
+( 15 points; Answer due {{< meta assess.group-date >}} )
+
+:::
+
+```{python}
+#| echo: false
+# import packages
+import geopandas as gpd
+import os
+from requests import get
+from urllib.parse import urlparse
+import pandas as pd
+```
+
+```{python}
+#| echo: false
+def cache_data(src:str, dest:str) -> str:
+    """
+    Downloads a file from the given URL `src` and saves it to the `dest` directory.
+    If the file already exists and is of sufficient size, skips the download.
+    
+    Args:
+        src (str): The source URL of the file to be downloaded.
+        dest (str): The destination directory where the file will be saved.
+        
+    Returns:
+        str: The full path to the downloaded (or existing) file.
+    """    
+    url = urlparse(src) # We assume that this is some kind of valid URL 
+    fn  = os.path.split(url.path)[-1] # Extract the filename
+    dfn = os.path.join(dest,fn) # Destination filename
+    
+    if not os.path.isfile(dfn) or os.path.getsize(dfn) < 250:
+        
+        print(f"{dfn} not found, downloading!")
+
+        path = os.path.split(dest)
+        
+        if len(path) >= 1 and path[0] != '':
+            os.makedirs(os.path.join(*path), exist_ok=True)
+            
+        with open(dfn, "wb") as file:
+            response = get(src)
+            file.write(response.content)
+
+    else:
+        pass
+
+    return dfn
+```
+
+```{python}
+#| echo: false
+# listing data,choose the data of 2024
+ymd  = '20240614'
+city = 'London'
+host = 'https://orca.casa.ucl.ac.uk'
+list_url  = f'{host}/~jreades/data/{ymd}-{city}-listings.parquet'
+transport_url = 'https://github.com/Chocolateyz/Chocolate/raw/refs/heads/main/Transport_Classification_of_Londoners_(TCoL)/Transport_Classification_of_Londoners_(TCoL).shp'
+inequity_url = 'https://github.com/Chocolateyz/Chocolate/raw/refs/heads/main/Borough_pages_data_UPDATE_9_2024_HACTAR(1).csv'
+pop_url = 'https://github.com/Chocolateyz/Chocolate/raw/refs/heads/main/population%20by%20borough.xlsx'
+sta_url = 'https://github.com/Chocolateyz/Chocolate/raw/refs/heads/main/London%20stations/London%20stations.shp'
+line_url = 'https://github.com/Chocolateyz/Chocolate/raw/refs/heads/main/London%20Train%20Lines/London%20Train%20Lines.shp'
+borough_url = 'https://github.com/Chocolateyz/Chocolate/raw/refs/heads/main/Boroughs.gpkg'
+```
+
+```{python}
+#| echo: false
+# the data frame of datas
+listing_df = pd.read_parquet(cache_data(list_url, os.path.join('data','raw')))
+# inequity data
+inequity = pd.read_csv(cache_data(inequity_url, os.path.join('data','raw')),skiprows=11, header=0)
+# population data
+pop = pd.read_excel(cache_data(pop_url, os.path.join('data','raw')))
+# borough outline
+borough = gpd.read_file(cache_data(borough_url, os.path.join('data','raw')))
+
+# station point data
+station = gpd.read_file(sta_url)
+# train line data
+line = gpd.read_file(line_url)
+# transport data, spatial unit is OA(output area)
+transport = gpd.read_file(transport_url)
+```
+
+```{python}
+#| echo: false
+# this is the columns list, if you want to focus on a certain topic, choose some of them
+# listing data
+columns_list = listing_df.columns.to_list()
+# transport data
+columns_transport = transport.columns.to_list()
+# inequity data
+columns_inequity = inequity.columns.to_list()
+# population data
+columns_pop = pop.columns.to_list()
+# station data
+columns_station = station.columns.to_list()
+# line data
+columns_line = line.columns.to_list()
+# borough outline
+columns_borough = borough.columns.to_list()
+```
+
+```{python}
+#| echo: false
+# what can be needed in listing
+airbnb_cols = [
+    'id', 'host_since', 'host_is_superhost', 'host_listings_count', 'host_total_listings_count',
+    'latitude', 'longitude', 'property_type', 'room_type', 'accommodates', 'price',
+    'minimum_nights', 'maximum_nights', 'availability_365', 'number_of_reviews'
+]
+
+airbnb_df = listing_df[airbnb_cols].copy()
+```
+
+```{python}
+#| echo: false
+# price all NaN to '0' then str
+airbnb_df['price'] = airbnb_df['price'].fillna('0').astype(str)
+# price float
+airbnb_df['price'] = airbnb_df['price'].str.replace('£', '').str.replace(',', '').astype(float)
+
+# host since date
+airbnb_df['host_since'] = pd.to_datetime(airbnb_df['host_since'], errors='coerce')
+
+# superhost
+airbnb_df['host_is_superhost'] = listing_df['host_is_superhost']
+
+# delete NaN
+airbnb_df.dropna(subset=['price', 'latitude', 'longitude', 'host_since'], inplace=True)
+
+# NaN to 0
+airbnb_df.loc[:, 'host_listings_count'] = airbnb_df['host_listings_count'].fillna(0)
+airbnb_df.loc[:, 'host_total_listings_count'] = airbnb_df['host_total_listings_count'].fillna(0)
+airbnb_df.loc[:, 'number_of_reviews'] = airbnb_df['number_of_reviews'].fillna(0)
+```
+
+```{python}
+# Superhost Ratio
+superhost_ratio = airbnb_df['host_is_superhost'].value_counts(normalize=True)
+```
+
+## 7. Drawing on your previous answers, and supporting your response with evidence (*e.g.* figures, maps, EDA/ESDA, and simple statistical analysis/models drawing on experience from, e.g., CASA0007), how *could* the InsideAirbnb data set be used to inform the regulation of Short-Term Lets (STL) in London? 
+
+::: {.duedate}
+
+( 45 points; Answer due {{< meta assess.group-date >}} )
+
+:::
+
+
+
+
+## References
