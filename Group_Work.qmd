@@ -438,7 +438,7 @@ Finally, the medium-priced zone (Yellow) includes medium-sized properties for fa
 
 For areas with higher prices, such as blue areas, a stricter housing registration or rental permit system is set up to prevent speculative short-term rentals in the market.
 In response to green area, the government can promote community-engaged tourism programmes that attract visitors on a budget to learn more about London's culture.
-Next, yellow area represents medium-priced rentals, primarily offering entire homes. The government can encourage these properties to implement green measures, such as promoting energy-efficient equipment and reducing the use of one-off items.
+Next, yellow area represents medium-priced rentals, primarily offering entire homes. The government can encourage these properties to implement green measures, such as promoting energy-efficient equipment and reducing the use of one-off items(Collins and  Curtis, 2018).
 
 ```{python}
 #| echo: false
@@ -495,7 +495,7 @@ plt.axis('off')
 plt.show()
 ```
 
-In conclusion, further monitoring of the impact of short-term rentals on home prices, especially Cluster 0 and Cluster 2, could put pressure on surrounding home prices and the long-term rental market. Meanwhile, regular monitoring is needed, and countermeasures such as limiting excessive short-term rentals should be implemented..
+In conclusion, further monitoring of the impact of short-term rentals on home prices, especially Cluster 0 and Cluster 2, could put pressure on surrounding home prices and the long-term rental market. At the same time, regular monitoring is needed and countermeasures are in place, such as limiting excessive short-term rentals (Furukawa and Onuki, 2022).
 
 
 ### Regression Analysis
