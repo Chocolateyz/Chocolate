@@ -48,6 +48,8 @@ jupyter:
     name: base
 ---
 
+# Questions
+
 
 ## 1. Who collected the InsideAirbnb data?
 
@@ -96,6 +98,7 @@ Since InsideAirbnb provides property information and updates it monthly, it can,
 
 :::
 
+Because this dataset contains information about Airbnb hosts, including property locations and host names, applying this information may lead to unintended identification or targeting. Additionally, the communities represented in the data may not have explicit permission to have their data used for research or analysis, so users must clearly communicate their research goals and intentions when using the data to ensure ethical compliance. Moreover, the design of Airbnb’s review system seriously affects the neutrality and transparency of reviews, also affects its ability to build trust among unfamiliar users[@Spier2024].
 
 ## 6. With reference to the InsideAirbnb data (*i.e.* using numbers, figures, maps, and descriptive statistics), what does an analysis of Hosts and the types of properties that they list suggest about the nature of Airbnb lettings in London? 
 
@@ -353,29 +356,6 @@ Listings by Borough:
 
 2.Outer boroughs have fewer listings, indicating lower demand or fewer hosts in these regions.
 
-```{python}
-#| echo: false
-'''
-fig, axes = plt.subplots(1, 2, figsize=(18, 8))
-
-# Airbnb Listing
-borough.plot(ax=axes[0], edgecolor='black', facecolor='none', linewidth=1)
-airbnb_gdf.plot(ax=axes[0], markersize=1, alpha=0.5, color='royalblue')
-axes[0].set_title('Airbnb Listings in London with Borough Boundaries')
-axes[0].set_xlabel('Longitude')
-axes[0].set_ylabel('Latitude')
-
-# Airbnb with borough
-borough_final.plot(column='total_listings', cmap='Blues', legend=True, linewidth=0.5, edgecolor='black', ax=axes[1])
-axes[1].set_title('Airbnb Listings by Borough')
-axes[1].set_xlabel('Longitude')
-axes[1].set_ylabel('Latitude')
-
-plt.tight_layout()
-plt.show()
-'''
-```
-
 ### Conclusion
 
 The analysis of hosts and property types in the InsideAirbnb data reveals that Airbnb lettings in London are characterized by:
@@ -424,22 +404,21 @@ preprocessor = ColumnTransformer(
 )
 data_preprocessed = preprocessor.fit_transform(data)
 #Use the elbow method to select the optimal number of clusters
-'''
-sse = []
-k_range = range(2, 10) 
 
-for k in k_range:
-    kmeans = KMeans(n_clusters=k, random_state=42)
-    kmeans.fit(data_preprocessed)
-    sse.append(kmeans.inertia_) 
+#sse = []
+#k_range = range(2, 10) 
+
+#for k in k_range:
+#    kmeans = KMeans(n_clusters=k, random_state=42)
+#    kmeans.fit(data_preprocessed)
+#    sse.append(kmeans.inertia_) 
 # Draw the elbow method diagram
-plt.figure(figsize=(8, 5))
-plt.plot(k_range, sse, marker='o')
-plt.xlabel('Number of Clusters (k)')
-plt.ylabel('Sum of Squared Errors (SSE)')
-plt.title('Elbow Method for Optimal k')
-plt.show()
-'''
+#plt.figure(figsize=(8, 5))
+#plt.plot(k_range, sse, marker='o')
+#plt.xlabel('Number of Clusters (k)')
+#plt.ylabel('Sum of Squared Errors (SSE)')
+#plt.title('Elbow Method for Optimal k')
+#plt.show()
 ```
 
 The blue area in the final result represents the high-priced property zone. The price distribution in this area shows significant variation, with the presence of extremely high-priced properties. These properties are mostly large spaces, with 94.3% being entire homes and very few classified as private rooms or shared rooms. These areas are primarily concentrated in wealthier, high-end regions on the map, which are likely city centers or high-income residential areas. These characteristics align with the housing market trends of Central London, such as Westminster, Kensington and Chelsea, and the City of London. These regions are economically developed and serve as hotspots for the high-end rental market. However, this category is also distributed in peripheral areas like Harrow, Havering, and Croydon. This may be due to the prevalence of low-density residential properties on London’s outskirts, which are often rented as entire homes at relatively high prices. In particular, although Havering is generally a low-density residential area, a small number of newly developed or high-specification entire properties (e.g., villas or resort-style homes) can drive up prices, causing these areas to also fall into this category.
