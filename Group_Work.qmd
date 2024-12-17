@@ -59,7 +59,7 @@ jupyter:
 
 :::
 
-The Inside Airbnb project, founded in 2014 by Murray Cox, who wanted to dispute Airbnb's claim that 87% of the hosts rent out the place in which they live [@Alsudais2021]. The project has benefited from the John Morris, who designed and refined the user experience, and Samantha Box, who supported coding and analysis while addressing key issues. Team members like Michael “Ziggy” Mintz and Anya Sophe Behn further enhanced automation and cloud migration [@insideairbnb]. Operating independently, the project equips policymakers, researchers, and communities to address Airbnb’s effects on housing and neighborhoods.
+The Inside Airbnb project, founded in 2014 by Murray Cox, aims to dispute Airbnb's claim that 87% of hosts rent out the place in which they live. [@Alsudais2021]. The project has benefited from the John Morris, who designed and refined the user experience, and Samantha Box, who supported coding and analysis while addressing key issues. Team members like Michael “Ziggy” Mintz and Anya Sophe Behn further enhanced automation and cloud migration [@insideairbnb]. Operating independently, the project equips policymakers, researchers, and communities to address Airbnb’s effects on housing and neighborhoods.
 
 ## 2. Why did they collect the InsideAirbnb data?
 
@@ -88,7 +88,7 @@ Inside Airbnb's data is extracted through web scraping technology from publicly 
 ( 11 points; Answer due Week 9 )
 
 :::
-Since InsideAirbnb provides property information and updates it monthly, it can, to some extent, represent the overall situation of the short-term rental market and assist in analyzing dynamic changes related to the time dimension. However, InsideAirbnb's data still has temporal limitations, and the publicly available data only reflects the content uploaded by hosts, which may contain false information or omissions, such as inaccurate reviews or misleading property descriptions. These issues may cause the data to fail to fully reflect the real market situation, thus affecting research based on InsideAirbnb data and further influencing the formulation of short-term rental market regulatory policies.
+Since InsideAirbnb provides property information and updates it monthly, it can, to some extent, represent the overall situation of the short-term rental market and assist in analyzing time-related dynamics. However, InsideAirbnb's data still has temporal limitations, and the publicly available data only reflects the content uploaded by hosts, which may contain false information or omissions, such as inaccurate reviews or misleading property descriptions. These issues may cause the data to fail to fully reflect the real market situation, thus affecting research based on InsideAirbnb data and further influencing the formulation of short-term rental market regulatory policies.
 
 ## 5. What ethical considerations does the use of the InsideAirbnb data raise? 
 
@@ -98,7 +98,7 @@ Since InsideAirbnb provides property information and updates it monthly, it can,
 
 :::
 
-Because this dataset contains information about Airbnb hosts, including property locations and host names, applying this information may lead to unintended identification or targeting. Additionally, the communities represented in the data may not have explicit permission to have their data used for research or analysis, so users must clearly communicate their research goals and intentions when using the data to ensure ethical compliance. Moreover, the design of Airbnb’s review system seriously affects the neutrality and transparency of reviews, also affects its ability to build trust among unfamiliar users[@Spier2024].
+Because this dataset contains information about Airbnb hosts, including property locations and host names, applying this information may lead to unintended identification or targeting. Additionally, the communities represented in the data may not have explicit permission to have their data used for research or analysis, so users must clearly communicate their research goals and intentions when using the data to ensure ethical compliance. Moreover, the design of Airbnb’s review system seriously affects the neutrality and transparency of reviews, as well as its ability to build trust among unfamiliar users[@Spier2024].
 
 ## 6. With reference to the InsideAirbnb data (*i.e.* using numbers, figures, maps, and descriptive statistics), what does an analysis of Hosts and the types of properties that they list suggest about the nature of Airbnb lettings in London? 
 
@@ -274,9 +274,9 @@ superhost_ratio = airbnb_df['host_is_superhost'].value_counts(normalize=True)
 
 1.Host Listings Distribution: 
 
-1.1The majority of hosts own between 1 to 2 listings, with a few managing hundreds or even thousands of properties.
+1.1 The majority of hosts own between 1 and 2 listings, with a few managing hundreds or even thousands of properties.
 
-1.2The distribution highlights the presence of professional operators in London's Airbnb market, with the largest host managing over 3000 listings.
+1.2 The distribution highlights the presence of professional operators in London's Airbnb market, with the largest host managing over 3000 listings.
 
 2.Superhost Ratio: 
 
@@ -360,7 +360,7 @@ Listings by Borough:
 
 The analysis of hosts and property types in the InsideAirbnb data reveals that Airbnb lettings in London are characterized by:
 
-1.A significant proportion of professional hosts with multiple listings.
+1.A significant proportion of professional hosts manage multiple listings.
 
 2.A dominance of entire home/apartment rentals, catering to tourists and short-term visitors.
 
@@ -382,7 +382,7 @@ This section primarily explores the spatial differences of different property ty
 
 This approach uses price, accommodates, and room type to classify the property situation across different boroughs. 
 
-First, the elbow curve is plotted to determine the number of clusters for classification, with the final choice being 3 clusters.
+The elbow curve is plotted to determine the optimal number of clusters, resulting in 3 clusters.
 
 ```{python}
 #| echo: false
@@ -423,10 +423,11 @@ data_preprocessed = preprocessor.fit_transform(data)
 
 Firstly, high-priced zone (Blue): Predominantly entire homes in wealthy areas like Central London (e.g., Westminster, Kensington), but also found in outer boroughs like Harrow and Havering due to high-specification properties.
 Secondly, low-priced zone (Green): Mostly private and shared rooms in Outer London (e.g., Barking, Newham), catering to budget-conscious tenants such as students.
-Finally, medium-priced zone (Yellow): Medium-sized properties for families in Inner London areas like Hackney and Southwark, serving as a transitional zone.
+Finally, the medium-priced zone (Yellow) includes medium-sized properties for families in Inner London areas like Hackney and Southwark, serving as a transitional zone.
+
 For areas with higher prices, such as blue areas, a stricter housing registration or rental permit system is set up to prevent speculative short-term rentals in the market.
 In response to green area, the government can promote community-engaged tourism programmes that attract visitors on a budget to learn more about London's culture.
-Next, yellow area represents medium-priced rentals, mostly offering entire homes. The government can encourage these properties to implement green measures, such as promoting energy-efficient equipment and reducing the use of one-off items.
+Next, yellow area represents medium-priced rentals, primarily offering entire homes. The government can encourage these properties to implement green measures, such as promoting energy-efficient equipment and reducing the use of one-off items.
 
 ```{python}
 #| echo: false
@@ -483,7 +484,7 @@ plt.axis('off')
 plt.show()
 ```
 
-In conclusion, further monitoring of the impact of short-term rentals on home prices, especially Cluster 0 and Cluster 2, could put pressure on surrounding home prices and the long-term rental market. At the same time, regular monitoring is needed and countermeasures are in place, such as limiting excessive short-term rentals (Furukawa and Onuki, 2022).
+In conclusion, further monitoring of the impact of short-term rentals on home prices, especially Cluster 0 and Cluster 2, could put pressure on surrounding home prices and the long-term rental market. Meanwhile, regular monitoring is needed, and countermeasures such as limiting excessive short-term rentals should be implemented..
 
 
 ### Regression Analysis
@@ -494,7 +495,7 @@ Since factors such as economic conditions, population characteristics, and trans
 
 The factors selected to describe economic conditions, population characteristics, and transportation accessibility include poverty rate, population density, density of subway stations, and density of rail lines. Principal Component Analysis (PCA) was applied to extract the most representative components from these variables.
 
-The dependent variable chosen to represent social inequality is the 80:20 ratio of earnings, which indicates the level of income inequality within a given area. 
+The dependent variable used to represent social inequality is the 80:20 ratio of earnings, which indicates the level of income inequality within a given area. 
 
 The variables derived from PCA were first used to model the density of short-term rentals. The residuals—representing the portion of variation potentially linked to other effects associated with short-term rental distribution—were then used as predictors for the social inequality variable. The analysis proceeded as follows:
 
@@ -677,7 +678,7 @@ r2_df = regression_all[['GSS_CODE','local_R2']]
 borough_r2 = borough.merge(r2_df,on = 'GSS_CODE', how='left')
 ```
 
-By comparing the R² values of the GWR results across different boroughs, the geographical variation in the impact of short-term rental distribution on social inequality was assessed.
+Comparing the R² values of the GWR results across boroughs reveals the geographical variation in how short-term rental distribution affects social inequality.
 
 The results reveal that certain boroughs, particularly in the central and western areas, such as Hammersmith and Fulham, display high R² values, reaching up to 0.7. This indicates that the independent variables explain 70% of the variation in the dependent variable. In contrast, boroughs such as Enfield and Waltham Forest exhibit R² values close to 0, suggesting that the effects of short-term rental distribution on social inequality vary significantly across regions.
 
@@ -716,6 +717,6 @@ Nevertheless, there are several issues and limitations in this analysis:
 
 3.Controlling for the influence of economic conditions, population, and transportation accessibility assumed linear effects, potentially overlooking nonlinear influences.
 
-4.The residuals, after accounting for economic, population, and transportation factors, may still include unaccounted external effects, meaning they do not solely represent the impact of short-term rental distribution.
+4.Even after accounting for economic, population, and transportation factors, the residuals may still reflect external influences, meaning they do not purely represent the impact of short-term rental distribution.
 
 ## References
