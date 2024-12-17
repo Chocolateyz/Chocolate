@@ -274,9 +274,9 @@ superhost_ratio = airbnb_df['host_is_superhost'].value_counts(normalize=True)
 
 1.Host Listings Distribution: 
 
-1.The majority of hosts own between 1 to 2 listings, with a few managing hundreds or even thousands of properties.
+1.1The majority of hosts own between 1 to 2 listings, with a few managing hundreds or even thousands of properties.
 
-2.The distribution highlights the presence of professional operators in London's Airbnb market, with the largest host managing over 3000 listings.
+1.2The distribution highlights the presence of professional operators in London's Airbnb market, with the largest host managing over 3000 listings.
 
 2.Superhost Ratio: 
 
@@ -421,11 +421,12 @@ data_preprocessed = preprocessor.fit_transform(data)
 #plt.show()
 ```
 
-The blue area in the final result represents the high-priced property zone. The price distribution in this area shows significant variation, with the presence of extremely high-priced properties. These properties are mostly large spaces, with 94.3% being entire homes and very few classified as private rooms or shared rooms. These areas are primarily concentrated in wealthier, high-end regions on the map, which are likely city centers or high-income residential areas. These characteristics align with the housing market trends of Central London, such as Westminster, Kensington and Chelsea, and the City of London. These regions are economically developed and serve as hotspots for the high-end rental market. However, this category is also distributed in peripheral areas like Harrow, Havering, and Croydon. This may be due to the prevalence of low-density residential properties on London’s outskirts, which are often rented as entire homes at relatively high prices. In particular, although Havering is generally a low-density residential area, a small number of newly developed or high-specification entire properties (e.g., villas or resort-style homes) can drive up prices, causing these areas to also fall into this category.
-
-The green area represents the low-priced property zone. The prices are significantly lower than those in the other two clusters. The properties are relatively small and primarily cater to individuals or couples. Most of these listings are private rooms, with a slightly higher proportion of shared rooms compared to the other clusters. These properties are typically located in Outer London, such as areas like Barking and Dagenham and Newham, where transportation is relatively convenient. However, rental demand mainly comes from budget-conscious tenants, such as students and solo travelers.
-
-The yellow area represents the medium-priced property zone. These properties are mostly medium-sized, suitable for small families or groups of three. They are typically located in Inner London, such as Hackney, Islington, and Southwark, forming a transitional zone.
+Firstly, high-priced zone (Blue): Predominantly entire homes in wealthy areas like Central London (e.g., Westminster, Kensington), but also found in outer boroughs like Harrow and Havering due to high-specification properties.
+Secondly, low-priced zone (Green): Mostly private and shared rooms in Outer London (e.g., Barking, Newham), catering to budget-conscious tenants such as students.
+Finally, medium-priced zone (Yellow): Medium-sized properties for families in Inner London areas like Hackney and Southwark, serving as a transitional zone.
+For areas with higher prices, such as blue areas, a stricter housing registration or rental permit system is set up to prevent speculative short-term rentals in the market.
+In response to green area, the government can promote community-engaged tourism programmes that attract visitors on a budget to learn more about London's culture.
+Next, yellow area represents medium-priced rentals, mostly offering entire homes. The government can encourage these properties to implement green measures, such as promoting energy-efficient equipment and reducing the use of one-off items.
 
 ```{python}
 #| echo: false
@@ -482,7 +483,8 @@ plt.axis('off')
 plt.show()
 ```
 
-In summary, The blue area is primarily composed of high-end entire home rentals, characterized by extremely high prices and great diversity. Spatially, it may overlap with central London or upscale residential areas. The green area mainly consists of low-priced private rooms, catering to budget-conscious renters such as solo travelers or students. It is primarily located in outer or secondary market areas. The yellow area represents medium-priced rentals, mostly offering entire homes, suitable for small families or groups. Geographically, it has a broader distribution, with some overlap with tourist hotspot areas.
+In conclusion, further monitoring of the impact of short-term rentals on home prices, especially Cluster 0 and Cluster 2, could put pressure on surrounding home prices and the long-term rental market. At the same time, regular monitoring is needed and countermeasures are in place, such as limiting excessive short-term rentals (Furukawa and Onuki, 2022).
+
 
 ### Regression Analysis
 
