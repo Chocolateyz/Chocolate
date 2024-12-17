@@ -1,0 +1,769 @@
+---
+bibliography: bio.bib
+csl: harvard-cite-them-right.csl
+title: Chocolate's Group Project
+assess:
+  group-date: '2024-12-17'
+execute:
+  echo: false
+  freeze: true
+format:
+  html:
+    code-copy: true
+    code-link: true
+    toc: true
+    toc-title: On this page
+    toc-depth: 2
+    toc_float:
+      collapsed: false
+      smooth_scroll: true
+  pdf:
+    include-in-header:
+      text: |
+        \addtokomafont{disposition}{\rmfamily}
+    mainfont: Spectral
+    sansfont: Roboto Flex
+    monofont: Liberation Mono
+    papersize: a4
+    geometry:
+      - top=25mm
+      - left=40mm
+      - right=30mm
+      - bottom=25mm
+      - heightrounded
+    toc: false
+    number-sections: false
+    colorlinks: true
+    highlight-style: github
+jupyter:
+  jupytext:
+    text_representation:
+      extension: .qmd
+      format_name: quarto
+      format_version: '1.0'
+      jupytext_version: 1.16.4
+  kernelspec:
+    display_name: Python (base)
+    language: python
+    name: base
+---
+
+## 1. Who collected the InsideAirbnb data?
+
+::: {.duedate}
+
+( 2 points; Answer due Week 7 )
+
+:::
+
+The Inside Airbnb project, founded in 2014 by Murray Cox, who wanted to dispute Airbnb's claim that 87% of the hosts rent out the place in which they live [@Alsudais2021]. The project has benefited from the John Morris, who designed and refined the user experience, and Samantha Box, who supported coding and analysis while addressing key issues. Team members like Michael “Ziggy” Mintz and Anya Sophe Behn further enhanced automation and cloud migration [@insideairbnb]. Operating independently, the project equips policymakers, researchers, and communities to address Airbnb’s effects on housing and neighborhoods.
+
+## 2. Why did they collect the InsideAirbnb data?
+
+::: {.duedate}
+
+( 4 points; Answer due Week 7 )
+
+:::
+
+The Inside Airbnb project is a mission-driven initiative that provides data and advocacy on Airbnb's impact on residential communities[@insideairbnb]. The collected data offers a more transparent and critical perspective, enabling stakeholders to assess Airbnb's role in local economies, housing markets, and community dynamics. By analyzing Airbnb listings, the project helps policymakers, researchers, and communities better understand the impact of Airbnb on issues such as housing affordability, availability, gentrification, and displacement.
+
+## 3. How did they collect it?
+
+::: {.duedate}
+
+( 5 points; Answer due Week 8 )
+
+:::
+
+Inside Airbnb's data is extracted through web scraping technology from publicly available listing information on the Airbnb website. This process collects key details, including price, location, host information, and availability. To provide accurate and up-to-date insights, the data is regularly updated, with new information replacing previous records on a monthly basis [@prentice2024]. Additionally, Inside Airbnb estimates monthly occupancy rates and income based on historical data, providing market analysis, basic hospitality indicators, and information on the legal status of the short-term rental market. At the same time, Inside Airbnb integrates geospatial data through public GIS datasets to map community boundaries and analyze the local impact. The collected data is analyzed, cleaned, and aggregated to facilitate public discussion and support the analysis of short-term rental market trends, helping communities make informed decisions regarding short-term rental regulation.
+
+## 4. How does the method of collection (Q3) impact the completeness and/or accuracy of the InsideAirbnb data? How well does it represent the process it seeks to study, and what wider issues does this raise?
+
+::: {.duedate}
+
+( 11 points; Answer due Week 9 )
+
+:::
+Since InsideAirbnb provides property information and updates it monthly, it can, to some extent, represent the overall situation of the short-term rental market and assist in analyzing dynamic changes related to the time dimension. However, InsideAirbnb's data still has temporal limitations, and the publicly available data only reflects the content uploaded by hosts, which may contain false information or omissions, such as inaccurate reviews or misleading property descriptions. These issues may cause the data to fail to fully reflect the real market situation, thus affecting research based on InsideAirbnb data and further influencing the formulation of short-term rental market regulatory policies.
+
+## 5. What ethical considerations does the use of the InsideAirbnb data raise? 
+
+::: {.duedate}
+
+( 18 points; Answer due {{< meta assess.group-date >}} )
+
+:::
+
+
+## 6. With reference to the InsideAirbnb data (*i.e.* using numbers, figures, maps, and descriptive statistics), what does an analysis of Hosts and the types of properties that they list suggest about the nature of Airbnb lettings in London? 
+
+::: {.duedate}
+
+( 15 points; Answer due {{< meta assess.group-date >}} )
+
+:::
+
+```{python}
+#| echo: false
+# import packages
+import geopandas as gpd
+import os
+from requests import get
+from urllib.parse import urlparse
+import pandas as pd
+import matplotlib.pyplot as plt
+from sklearn.preprocessing import StandardScaler, OneHotEncoder
+from sklearn.cluster import KMeans
+from sklearn.compose import ColumnTransformer
+import numpy as np
+from sklearn.decomposition import PCA
+from shapely.geometry import Point
+from esda import Moran, Moran_Local
+from libpysal.weights import Queen, KNN
+from splot.esda import moran_scatterplot, lisa_cluster
+from esda.moran import Moran
+from pyproj import Transformer
+from pyproj import CRS
+from mgwr.gwr import GWR
+from mgwr.sel_bw import Sel_BW
+import seaborn as sns
+from sklearn.linear_model import LinearRegression
+from sklearn.model_selection import train_test_split
+from sklearn.preprocessing import StandardScaler
+from sklearn.metrics import mean_squared_error
+```
+
+```{python}
+#| echo: false
+def cache_data(src:str, dest:str) -> str:
+    """
+    Downloads a file from the given URL `src` and saves it to the `dest` directory.
+    If the file already exists and is of sufficient size, skips the download.
+    
+    Args:
+        src (str): The source URL of the file to be downloaded.
+        dest (str): The destination directory where the file will be saved.
+        
+    Returns:
+        str: The full path to the downloaded (or existing) file.
+    """    
+    url = urlparse(src) # We assume that this is some kind of valid URL 
+    fn  = os.path.split(url.path)[-1] # Extract the filename
+    dfn = os.path.join(dest,fn) # Destination filename
+    
+    if not os.path.isfile(dfn) or os.path.getsize(dfn) < 250:
+        
+        print(f"{dfn} not found, downloading!")
+
+        path = os.path.split(dest)
+        
+        if len(path) >= 1 and path[0] != '':
+            os.makedirs(os.path.join(*path), exist_ok=True)
+            
+        with open(dfn, "wb") as file:
+            response = get(src)
+            file.write(response.content)
+
+    else:
+        pass
+
+    return dfn
+```
+
+```{python}
+#| echo: false
+# listing data,choose the data of 2024
+ymd  = '20240614'
+city = 'London'
+host = 'https://orca.casa.ucl.ac.uk'
+list_url  = f'{host}/~jreades/data/{ymd}-{city}-listings.parquet'
+transport_url = 'https://github.com/Chocolateyz/Chocolate/raw/refs/heads/main/Transport_Classification_of_Londoners_(TCoL)/Transport_Classification_of_Londoners_(TCoL).shp'
+inequity_url = 'https://github.com/Chocolateyz/Chocolate/raw/refs/heads/main/Borough_pages_data_UPDATE_9_2024_HACTAR(1).csv'
+pop_url = 'https://github.com/Chocolateyz/Chocolate/raw/refs/heads/main/population%20by%20borough.xlsx'
+sta_url = 'https://github.com/Chocolateyz/Chocolate/raw/refs/heads/main/London%20stations/London%20stations.shp'
+line_url = 'https://github.com/Chocolateyz/Chocolate/raw/refs/heads/main/London%20Train%20Lines/London%20Train%20Lines.shp'
+borough_url = 'https://github.com/Chocolateyz/Chocolate/raw/refs/heads/main/Boroughs.gpkg'
+```
+
+```{python}
+#| echo: false
+# the data frame of datas
+listing_df = pd.read_parquet(cache_data(list_url, os.path.join('data','raw')))
+# inequity data
+inequity = pd.read_csv(cache_data(inequity_url, os.path.join('data','raw')),skiprows=11, header=0)
+# population data
+pop = pd.read_excel(cache_data(pop_url, os.path.join('data','raw')))
+# borough outline
+borough = gpd.read_file(cache_data(borough_url, os.path.join('data','raw')))
+
+# station point data
+station = gpd.read_file(sta_url)
+# train line data
+line = gpd.read_file(line_url)
+# transport data, spatial unit is OA(output area)
+transport = gpd.read_file(transport_url)
+```
+
+```{python}
+#| echo: false
+# this is the columns list, if you want to focus on a certain topic, choose some of them
+# listing data
+columns_list = listing_df.columns.to_list()
+# transport data
+columns_transport = transport.columns.to_list()
+# inequity data
+columns_inequity = inequity.columns.to_list()
+# population data
+columns_pop = pop.columns.to_list()
+# station data
+columns_station = station.columns.to_list()
+# line data
+columns_line = line.columns.to_list()
+# borough outline
+columns_borough = borough.columns.to_list()
+```
+
+```{python}
+#| echo: false
+# what can be needed in listing
+airbnb_cols = [
+    'id', 'host_since', 'host_is_superhost', 'host_listings_count', 'host_total_listings_count',
+    'latitude', 'longitude', 'property_type', 'room_type', 'accommodates', 'price',
+    'minimum_nights', 'maximum_nights', 'availability_365', 'number_of_reviews'
+]
+
+airbnb_df = listing_df[airbnb_cols].copy()
+```
+
+```{python}
+#| echo: false
+# price all NaN to '0' then str
+airbnb_df['price'] = airbnb_df['price'].fillna('0').astype(str)
+# price float
+airbnb_df['price'] = airbnb_df['price'].str.replace('£', '').str.replace(',', '').astype(float)
+
+# host since date
+airbnb_df['host_since'] = pd.to_datetime(airbnb_df['host_since'], errors='coerce')
+
+# superhost
+airbnb_df['host_is_superhost'] = listing_df['host_is_superhost']
+
+# delete NaN
+airbnb_df.dropna(subset=['price', 'latitude', 'longitude', 'host_since'], inplace=True)
+
+# NaN to 0
+airbnb_df.loc[:, 'host_listings_count'] = airbnb_df['host_listings_count'].fillna(0)
+airbnb_df.loc[:, 'host_total_listings_count'] = airbnb_df['host_total_listings_count'].fillna(0)
+airbnb_df.loc[:, 'number_of_reviews'] = airbnb_df['number_of_reviews'].fillna(0)
+```
+
+```{python}
+#| echo: false
+# Superhost Ratio
+superhost_ratio = airbnb_df['host_is_superhost'].value_counts(normalize=True)
+```
+
+### Host Analysis
+
+1.Host Listings Distribution: 
+
+1.The majority of hosts own between 1 to 2 listings, with a few managing hundreds or even thousands of properties.
+
+2.The distribution highlights the presence of professional operators in London's Airbnb market, with the largest host managing over 3000 listings.
+
+2.Superhost Ratio: 
+
+Only 16.6% of hosts are Superhosts, suggesting that while a small percentage of hosts maintain high service standards, the majority are casual or infrequent hosts.
+
+```{python}
+#| echo: false
+fig, axes = plt.subplots(1, 2, figsize=(15, 6))
+
+# Listings per Host
+airbnb_df['host_listings_count'].plot(kind='hist', bins=30, ax=axes[0], color='skyblue')
+axes[0].set_title('Distribution of Host Listings Count')
+axes[0].set_xlabel('Number of Listings per Host')
+axes[0].set_ylabel('Frequency')
+
+# Superhost Ratio
+superhost_ratio.plot(kind='bar', ax=axes[1], color=['orange', 'green'])
+axes[1].set_title('Superhost Ratio')
+axes[1].set_xlabel('Superhost Status')
+axes[1].set_ylabel('Count')
+
+plt.tight_layout()
+plt.show()
+```
+
+### Property Type Distribution and Room Type Distribution
+
+Property Type Distribution:
+
+1.The most common property types are "Entire rental units" and "Private rooms in rental units".
+
+2.This indicates a mix of properties catering to both tourists seeking entire apartments and budget-conscious travelers looking for private rooms.
+
+Room Type Distribution:
+
+1.63.7% of listings are entire homes/apartments, while 35.7% are private rooms.
+
+2.The dominance of entire homes suggests that Airbnb in London is often used for short-term vacation rentals rather than shared accommodation.
+
+```{python}
+#| echo: false
+# property type counts
+property_counts = airbnb_df['property_type'].value_counts()
+
+fig, axes = plt.subplots(1, 2, figsize=(18, 6))
+
+# visualize first 15s
+airbnb_df['property_type'].value_counts().head(15).plot(kind='bar', ax=axes[0], color='purple')
+axes[0].set_title('Top 15 Property Types')
+axes[0].set_xlabel('Property Type')
+axes[0].set_ylabel('Number of Listings')
+axes[0].tick_params(axis='x', rotation=45)
+
+# room type
+room_type_counts = airbnb_df['room_type'].value_counts()
+
+airbnb_df['room_type'].value_counts().plot(kind='barh', ax=axes[1], color='green')
+axes[1].set_title('Room Type Distribution')
+axes[1].set_xlabel('Number of Listings')
+axes[1].set_ylabel('Room Type')
+
+plt.tight_layout()
+plt.show()
+```
+
+### Price and Rental Duration
+
+1.The average price of an Airbnb listing is £183, but most listings are priced between £50 and £200.
+
+2.The presence of a few extremely high-priced listings skews the average, indicating luxury rental options are available.
+
+```{python}
+#| echo: false
+# add <30 days
+filtered_min_nights = airbnb_df[airbnb_df['minimum_nights'] < 30]
+plt.figure(figsize=(10, 6))
+filtered_min_nights['minimum_nights'].plot(kind='hist', bins=30, color='skyblue', edgecolor='black')
+plt.title('Distribution of Minimum Nights (Filtered)')
+plt.xlabel('Minimum Nights')
+plt.ylabel('Frequency')
+plt.grid(axis='y', linestyle='--', alpha=0.7)
+plt.show()
+```
+
+### Minimum Nights Distribution
+
+Most properties have a minimum stay requirement of 1 to 5 nights, making Airbnb suitable for short-term rentals.
+
+```{python}
+#| echo: false
+# Under 1000
+airbnb_df[airbnb_df['price'] < 1000]['price'].plot(kind='hist', bins=50, title='Price Distribution (Under £1000)')
+plt.xlabel('Price (£)')
+plt.show()
+```
+
+### Geographical Distribution
+
+Airbnb Listings Distribution:
+
+1.Listings are concentrated in central boroughs such as Westminster, Camden, and Kensington.
+
+2.This reflects high tourist demand in central London areas.
+
+Listings by Borough:
+
+1.Central boroughs have the highest density of listings, correlating with higher property prices and demand for short-term accommodation.
+
+2.Outer boroughs have fewer listings, indicating lower demand or fewer hosts in these regions.
+
+```{python}
+#| echo: false
+'''
+fig, axes = plt.subplots(1, 2, figsize=(18, 8))
+
+# Airbnb Listing
+borough.plot(ax=axes[0], edgecolor='black', facecolor='none', linewidth=1)
+airbnb_gdf.plot(ax=axes[0], markersize=1, alpha=0.5, color='royalblue')
+axes[0].set_title('Airbnb Listings in London with Borough Boundaries')
+axes[0].set_xlabel('Longitude')
+axes[0].set_ylabel('Latitude')
+
+# Airbnb with borough
+borough_final.plot(column='total_listings', cmap='Blues', legend=True, linewidth=0.5, edgecolor='black', ax=axes[1])
+axes[1].set_title('Airbnb Listings by Borough')
+axes[1].set_xlabel('Longitude')
+axes[1].set_ylabel('Latitude')
+
+plt.tight_layout()
+plt.show()
+'''
+```
+
+### Conclusion
+
+The analysis of hosts and property types in the InsideAirbnb data reveals that Airbnb lettings in London are characterized by:
+
+1.A significant proportion of professional hosts with multiple listings.
+
+2.A dominance of entire home/apartment rentals, catering to tourists and short-term visitors.
+
+3.Concentration in central boroughs with high demand for short-term rentals.
+
+4.Price points that reflect both budget and luxury options.
+
+## 7. Drawing on your previous answers, and supporting your response with evidence (*e.g.* figures, maps, EDA/ESDA, and simple statistical analysis/models drawing on experience from, e.g., CASA0007), how *could* the InsideAirbnb data set be used to inform the regulation of Short-Term Lets (STL) in London? 
+
+::: {.duedate}
+
+( 45 points; Answer due {{< meta assess.group-date >}} )
+
+:::
+
+This section primarily explores the spatial differences of different property types and the social impacts brought by short-term rental density, using cluster analysis and geographically weighted regression. It also analyzes how such visualizations can inform the development of short-term rental (STL) regulation policies in London.
+
+### cluster analysis
+
+This approach uses price, accommodates, and room type to classify the property situation across different boroughs. 
+
+First, the elbow curve is plotted to determine the number of clusters for classification, with the final choice being 3 clusters.
+
+```{python}
+#| echo: false
+#Choose 'price','accommodates', 'room_type' as clustering variables
+data = listing_df[['price','accommodates', 'room_type', 'latitude', 'longitude']].copy()
+data = data.dropna()
+#Data cleansing (removal of outliers with a price of 0 or negative)
+data['price'] = data['price'].replace('[\$,]', '', regex=True).astype(float) 
+data = data[data['price'] > 0]  
+# Take the logarithm of the price to reduce the impact of extreme values
+data['log_price'] = np.log1p(data['price'])
+clustering_vars = ['log_price', 'accommodates', 'room_type']
+# Standardized numerical features and One-hot encoding category features
+preprocessor = ColumnTransformer(
+    transformers=[
+        ('num', StandardScaler(), ['log_price', 'accommodates']),  
+        ('cat', OneHotEncoder(), ['room_type']) 
+    ]
+)
+data_preprocessed = preprocessor.fit_transform(data)
+#Use the elbow method to select the optimal number of clusters
+sse = []
+k_range = range(2, 10) 
+
+for k in k_range:
+    kmeans = KMeans(n_clusters=k, random_state=42)
+    kmeans.fit(data_preprocessed)
+    sse.append(kmeans.inertia_) 
+# Draw the elbow method diagram
+plt.figure(figsize=(8, 5))
+plt.plot(k_range, sse, marker='o')
+plt.xlabel('Number of Clusters (k)')
+plt.ylabel('Sum of Squared Errors (SSE)')
+plt.title('Elbow Method for Optimal k')
+plt.show()
+```
+
+The blue area in the final result represents the high-priced property zone. The average price is 464.46, which is much higher than the other two clusters. The standard deviation is large (1001.6), indicating significant price variation in this region, with a maximum price of 80,100, suggesting the presence of extreme high-priced properties. The average accommodation capacity is 5.93, indicating that these properties are often larger in size. Among them, 94.3% are Entire home/apt (entire properties), with very few Private room or Shared room listings. These areas are mainly concentrated in the wealthier, upscale regions on the map, likely in the city center or high-income residential areas. These characteristics align with the property market in central London, such as Westminster, Kensington and Chelsea, and the City of London. These economically developed areas are hotspots for high-end rentals. However, this category is also distributed in peripheral areas such as Harrow, Havering, and Croydon, likely due to the presence of large, low-density residential areas in London's outskirts, where entire homes are often rented out at high prices. Particularly in Havering, although the area is generally low-density, a small number of newly developed or high-spec entire homes (e.g., villas or resort-style properties) drive up prices, causing these areas to be included in this cluster.
+
+The green area represents the low-priced property zone. The average price is 59.70, much lower than the other two clusters. The standard deviation is small (30.61), indicating a stable price distribution. The average accommodation capacity is 1.78, showing that these properties are small, typically catering to individuals or couples. Among them, 97.7% are Private room listings. The proportion of Shared room listings is slightly higher than in the other clusters. These properties are generally located in Outer London areas, such as Barking and Dagenham and Newham, where transportation is relatively convenient. However, the demand for these rentals primarily comes from budget-conscious tenants, such as students or solo travelers.
+
+The yellow area represents the medium-priced property zone. The average price is 143.69, which falls between the other two clusters. The standard deviation is 74.67, indicating a relatively balanced price distribution. The average accommodation capacity is 2.98, suggesting that these properties are medium-sized and suitable for small families or groups of three. Among them, 97.0% are Entire home/apt listings, with very few Private room or Shared room listings. These properties are typically located in Inner London areas, such as Hackney, Islington, and Southwark, forming a transitional zone.
+
+```{python}
+#| echo: false
+#K-means
+optimal_k = 3
+kmeans = KMeans(n_clusters=optimal_k, random_state=42)
+data['cluster'] = kmeans.fit_predict(data_preprocessed)
+```
+
+```{python}
+#| echo: false
+borough_url = 'https://github.com/Chocolateyz/Chocolate/raw/refs/heads/main/Boroughs.gpkg'
+boroughs = gpd.read_file(borough_url)
+```
+
+```{python}
+#| echo: false
+#Convert the CRS of Boroughs.gpkg from EPSG:27700 to EPSG:4326
+boroughs = boroughs.to_crs('EPSG:4326')
+#Create a GeoDataFrame containing latitude and longitude
+geo_data = gpd.GeoDataFrame(data, geometry=gpd.points_from_xy(data['longitude'], data['latitude']))
+geo_data = geo_data.set_crs('EPSG:4326', allow_override=True)
+# Delete the 'index_right' column that may already exist
+if 'index_right' in geo_data.columns:
+    geo_data = geo_data.drop(columns=['index_right'])
+if 'index_right' in boroughs.columns:
+    boroughs = boroughs.drop(columns=['index_right'])
+# Perform spatial join
+geo_data = gpd.sjoin(geo_data, boroughs, how='inner', predicate='within')
+# Merge 'cluster' column into 'boroughs' by clustering results
+boroughs = boroughs.join(geo_data['cluster'], how='left')
+```
+
+```{python}
+#| echo: false
+if 'index_right' in geo_data.columns:
+    geo_data = geo_data.drop(columns=['index_right'])
+if 'index_right' in boroughs.columns:
+    boroughs = boroughs.drop(columns=['index_right'])
+    
+geo_data = gpd.sjoin(geo_data, boroughs, how='inner', predicate='within')
+
+# Visualization
+boroughs.plot(
+    column='cluster', 
+    cmap='Set3', 
+      legend=False, 
+    legend_kwds={'label': "Cluster Types", 'orientation': "horizontal"},
+    edgecolor='black',  
+    linewidth=0.5
+)
+plt.title('K-Means Clustering Result')
+plt.axis('off')
+plt.show()
+```
+
+In summary, The blue area is primarily composed of high-end entire home rentals, characterized by extremely high prices and great diversity. Spatially, it may overlap with central London or upscale residential areas. The green area mainly consists of low-priced private rooms, catering to budget-conscious renters such as solo travelers or students. It is primarily located in outer or secondary market areas. The yellow area represents medium-priced rentals, mostly offering entire homes, suitable for small families or groups. Geographically, it has a broader distribution, with some overlap with tourist hotspot areas.
+
+### regression analysis
+
+The distribution of short-term rental properties may lead to a series of social effects. This section takes social inequality as an example to explore the impact of short-term rental distribution on social outcomes. By visualizing the spatial differences in these effects, the analysis reveals the varying urgency for policy intervention across different areas.
+
+Since factors such as economic conditions, population characteristics, and transportation accessibility may influence the distribution of short-term rentals—and these factors are not the focus of this study—their effects were removed from the independent variables.
+
+The factors selected to describe economic conditions, population characteristics, and transportation accessibility include poverty rate, population density, density of subway stations, and density of rail lines. Principal Component Analysis (PCA) was applied to extract the most representative components from these variables.
+
+The dependent variable chosen to represent social inequality is the 80:20 ratio of earnings, which indicates the level of income inequality within a given area. Specifically, this metric reflects the ratio of the total income of the wealthiest 20% of the population to the total income of the poorest 20%.
+
+Administrative boroughs were used as the spatial units of analysis. The variables derived from PCA were first used to model the density of short-term rentals. The residuals—representing the portion of variation potentially linked to other effects associated with short-term rental distribution—were then used as predictors for the social inequality variable. The analysis proceeded as follows:
+
+1.A global regression was performed using Ordinary Least Squares (OLS).
+
+2.Geographically Weighted Regression (GWR) was applied in the second step.
+
+```{python}
+#| echo: false
+# Convert df to gdf
+listing_df['geometry'] = listing_df.apply(lambda row: Point(row['longitude'], row['latitude']), axis=1)
+listing_gdf = gpd.GeoDataFrame(listing_df, geometry='geometry', crs="EPSG:4326")
+listing_gdf = listing_gdf.to_crs(epsg=27700)
+
+# select columns
+geo_list = listing_gdf[['name','geometry']]
+
+# Calculate the number of short-term rental data points contained in each borough
+joined_gdf = gpd.sjoin(geo_list, borough, how="inner", predicate="within")
+point_counts = joined_gdf.groupby('GSS_CODE').size().reset_index(name='point_count')
+#borough.set_index('GSS_CODE', inplace=True)
+#borough.reset_index(inplace=True)
+
+# add point count into borough
+borough_list = borough.merge(point_counts, on='GSS_CODE', how='left')
+
+# set zero if there is no point
+#borough_list['point_count'].fillna(0, inplace=True)
+```
+
+```{python}
+#| echo: false
+# unify the coordinate system
+station = station.to_crs(epsg=27700)
+line = line.to_crs(epsg=27700)
+# Count the number of underground stations in each borough and join the result to the borough data
+station_join = gpd.sjoin(station, borough, how="inner", predicate="within")
+station_counts = station_join.groupby('GSS_CODE').size().reset_index(name='station_count')
+regression1 = borough_list.merge(station_counts,on='GSS_CODE', how='left')
+
+# Calculate the track length in each borough and join the result to the borough data
+line_join = gpd.sjoin(line, borough, how="inner", predicate="within")
+line_join['line_length'] = line_join.geometry.length
+lengths_per_borough = line_join.groupby('GSS_CODE')['line_length'].sum().reset_index()
+regression2 = regression1.merge(lengths_per_borough,on='GSS_CODE', how='left')
+# Standardize the format of borough names
+inequity['Area'] = inequity['Area'].str.replace('&','and')
+# Join the population and inequality index data together
+pop_inequity = pd.merge(pop, inequity, left_on='NAME', right_on='Area', how='left')
+# join all of the data
+regression3 = regression2.merge(pop_inequity,on='GSS_CODE', how='left')
+```
+
+```{python}
+#| echo: false
+# caculate densities
+regression4 = regression3[['GSS_CODE','Area','HECTARES','Poverty rate','station_count','line_length','POPULATION','point_count','80:20 ratio of earnings','geometry']]
+regression4['population_density'] = regression3['POPULATION'] / regression3['HECTARES']
+regression4['airbnb_density'] = regression3['point_count'] / regression3['HECTARES']
+regression4['station_density'] = regression3['station_count'] / regression3['HECTARES']
+regression4['line_density'] = regression3['line_length'] / regression3['HECTARES']
+# select columns for regression,remove NA
+regression_all = regression4.drop(columns=['POPULATION', 'HECTARES','point_count','station_count','line_length']).dropna()
+```
+
+```{python}
+#| echo: false
+# Use short-term rental point data as the dependent variable, excluding the impacts of economy, population, and transportation
+X = regression_all.drop(columns=['geometry','airbnb_density','80:20 ratio of earnings','GSS_CODE','Area'])  # independent variables
+Y = regression_all['airbnb_density'] 
+scaler = StandardScaler()
+X_scaled = scaler.fit_transform(X)
+# Principal Component Analysis (PCA) to avoid multicollinearity.
+pca = PCA(n_components=0.95)  
+X_pca = pca.fit_transform(X_scaled)
+```
+
+```{python}
+#| echo: false
+# Split the data into training and testing sets for linear fitting
+X_train, X_test, Y_train, Y_test = train_test_split(X_pca, Y, test_size=0.2, random_state=42)
+
+# regression analysis
+model = LinearRegression()
+model.fit(X_train, Y_train)
+
+r2_train = model.score(X_train, Y_train)
+r2_test = model.score(X_test, Y_test)
+Y_pred_all = model.predict(X_pca)
+
+# Calculate the residuals for all boroughs
+residuals_all = Y - Y_pred_all
+```
+
+```{python}
+#| echo: false
+# Get the coordinates (longitude, latitude) of the centroids of the geometries
+coords = regression_all.geometry.centroid.apply(lambda x: (x.x, x.y)).to_list()
+# Convert the list of coordinates into a NumPy array
+coords = np.array(coords)
+# Use the '80:20 ratio of earnings' as an indicator of inequality.
+# Extract the values of the '80:20 ratio of earnings' column as the dependent variable
+real_y = regression_all['80:20 ratio of earnings'].values 
+# Choose residuals from the previous regression model as independent variable
+residuals = residuals_all.values 
+```
+
+```{python}
+#| echo: false
+# Scale the residuals to standardize them
+scaler = StandardScaler()
+residuals_scaled = scaler.fit_transform(residuals.reshape(-1, 1))
+# Scale the real_y values to standardize them
+real_y_scaled = scaler.fit_transform(real_y.reshape(-1, 1))
+# Add a constant term
+X_loc = np.hstack([np.ones((residuals_scaled.shape[0], 1)), residuals_scaled])
+# Select the optimal bandwidth
+#selector = Sel_BW(coords=coords, y=real_y_scaled, X_loc=X_loc)
+#bandwidth = selector.search(criterion='AICc',bw_min=5, bw_max=15)
+```
+
+```{python}
+#| echo: false
+bandwidth = 13
+#print(f"Optimal bandwidth: {bandwidth}")
+regression_data = np.column_stack([residuals_scaled, real_y_scaled])
+
+# Fit a Geographically Weighted Regression (GWR) model
+gwr_model = GWR(coords = coords, y=real_y_scaled, X = X_loc, bw = bandwidth)
+gwr_results = gwr_model.fit()
+```
+
+The following table describes the results of the second step, Geographically Weighted Regression (GWR). The results show that, after removing the aforementioned control factors, GWR performs better than the global regression, with the independent variables explaining more of the variation in the dependent variable. This also indicates, to some extent, that the impact of rental density on social inequality exhibits spatial variation.
+
+```{python}
+#| echo: false
+# Define R² and Adjusted R² values for global regression and GWR regression
+global_r2 = 0.044
+global_adj_r2 = 0.010
+gwr_r2 = 0.523
+gwr_adj_r2 = 0.249
+
+# Create a dictionary to hold the regression results
+results_dict = {
+    "Model Type": ["Global Regression", "GWR Regression"],
+    "R²": [global_r2, gwr_r2],
+    "Adjusted R²": [global_adj_r2, gwr_adj_r2]
+}
+
+# Convert the dictionary to DataFrame
+results_df = pd.DataFrame(results_dict)
+
+# Create a figure and axis for the table visualization
+fig, ax = plt.subplots(figsize=(8,3))
+ax.axis('tight')
+ax.axis('off')
+table = ax.table(cellText=results_df.values, colLabels=results_df.columns, loc='center')
+
+# Customize the appearance of the table cells
+for (i, j), cell in table.get_celld().items():
+    cell.set_text_props(horizontalalignment='center', verticalalignment='center', fontsize=12,fontname='Source Serif 4')
+    if i == 0:
+        cell.set_fontsize(14)
+        cell.set_text_props(weight='bold')  
+        cell.set_facecolor((176/255, 224/255, 230/255, 0.5)) 
+    else:
+        cell.set_facecolor((0.878, 1, 1,0.2))
+    cell.set_height(0.15)
+
+# Add title, adjust its position
+plt.title("R² Comparison Between Global Regression and GWR", fontsize=14,fontname='Source Serif 4',y=0.8)
+# Display the table
+plt.show()
+```
+
+```{python}
+#| echo: false
+# representing the local R square
+local_r2_values = gwr_results.localR2
+# Join the obtained local R² values back to the borough data
+regression_all['local_R2'] = local_r2_values
+r2_df = regression_all[['GSS_CODE','local_R2']]
+borough_r2 = borough.merge(r2_df,on = 'GSS_CODE', how='left')
+```
+
+By comparing the R² values of the GWR results across different boroughs, the geographical variation in the impact of short-term rental distribution on social inequality was assessed.
+
+The results reveal that certain boroughs, particularly in the central and western areas, such as Hammersmith and Fulham, display high R² values, reaching up to 0.7. This indicates that the independent variables explain 70% of the variation in the dependent variable. In contrast, boroughs such as Enfield and Waltham Forest exhibit R² values close to 0, suggesting that the effects of short-term rental distribution on social inequality vary significantly across regions.
+
+The results reveal the varying degrees to which social inequality in different regions is influenced by the distribution of short-term rentals, highlighting differences in the urgency of policy intervention across areas. For example, in Hammersmith and Fulham, the R-squared value is notably high, and the coefficient is positive, indicating a significant positive correlation between the increase in short-term rental density and the rise in social inequality. This suggests that the impact of short-term rental distribution on income inequality is particularly pronounced in this area, underscoring the greater necessity for policy intervention. Measures such as setting limits on short-term rentals, increasing taxes and fees, and encouraging properties to return to the long-term rental market can be implemented. However, the specific measures to be taken require further analysis of the underlying causes of this high correlation.
+
+```{python}
+#| echo: false
+# Convert the coordinate reference system
+borough_r2 = borough_r2.to_crs(epsg=4326)
+# Replace 'NA' values with NaN
+borough_r2['local_R2'] = borough_r2['local_R2'].replace('NA', np.nan)
+# Create a figure and axis for plotting
+fig, ax = plt.subplots(figsize=(10, 8))
+
+# Plot the borough data, using the 'local_R2' column to color the map.
+borough_r2.plot(column='local_R2', cmap='YlGnBu', legend=True,
+                missing_kwds={'color': 'gray', 'label': 'Missing values'},
+                legend_kwds={'label': "Local R² Value", 'orientation': "horizontal"},
+                ax=ax)
+borough_r2.boundary.plot(ax=ax, edgecolor='black', linewidth=0.3,alpha = 0.6)
+# Remove grid lines
+ax.grid(False)
+# Add title and label
+plt.title('Map of Local R² by Region',fontsize=16)
+plt.xlabel('Longitude',fontsize=14)
+plt.ylabel('Latitude',fontsize=14)
+# Display the plot
+plt.show()
+```
+
+Nevertheless, there are several issues and limitations in this analysis:
+
+1.The large spatial unit of the data may result in insufficient sample sizes, which can affect the stability and interpretability of the model's results.
+
+2.Missing data in some regions led to the absence of R² values in certain areas.
+
+3.Controlling for the influence of economic conditions, population, and transportation accessibility assumed linear effects, potentially overlooking nonlinear influences.
+
+4.The residuals, after accounting for economic, population, and transportation factors, may still include unaccounted external effects, meaning they do not solely represent the impact of short-term rental distribution.
+
+## References
